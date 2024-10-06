@@ -97,3 +97,31 @@ const App = () => {
 };
 
 export default App;
+
+import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
+import Header from './components/Header';
+import FileUpload from './components/FileUpload'; // Import the FileUpload component
+
+const socket = io.connect('http://localhost:5000');
+
+const App = () => {
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+
+  // Voice recognition setup...
+
+  return (
+    <div className="App">
+      <Header />
+      <button onClick={handleVoiceInput}>Speak</button>
+      <p>You said: {message}</p>
+      <p>Response: {response}</p>
+
+      {/* File upload section */}
+      <FileUpload /> 
+    </div>
+  );
+};
+
+export default App;

@@ -129,3 +129,46 @@ socket.on('message', async (message) => {
     }
   });
   
+  require('dotenv').config();
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const { openai } = require('./config/openaiConfig');
+const { controlRobot } = require('./robotControl');
+const fileUploadRoutes = require('./routes/fileUpload'); // File upload routes
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+app.use(express.json());
+app.use('/upload', fileUploadRoutes); // Use file upload routes
+
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
+
+// socket.io handling ...
+
+server.listen(5000, () => {
+  console.log('Server is running on http://localhost:5000');
+});
+
+const fs = require('fs');
+const logFilePath = './logs/server.log';
+
+const logMessage = (message) => {
+  const timeStamp = new Date().toISOString();
+  fs.appendFileSync(logFilePath, `${timeStamp} - ${message}\n`);
+};
+
+// Example usage:
+app.use((req, res, next) => {
+  logMessage(`Received ${req.method} request on ${req.url}`);
+  next();
+});
+
+io.on('connection', (socket) => {
+  logMessage('A user connected via socket');
+  // Existing socket logic...
+});
