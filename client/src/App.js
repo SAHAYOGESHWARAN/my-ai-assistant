@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
+import './styles/App.css';
 
 const socket = io.connect('http://localhost:5000');
 
