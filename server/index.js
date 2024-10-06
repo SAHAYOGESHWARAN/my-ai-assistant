@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { Configuration, OpenAIApi } = require('openai');
+const { controlRobot } = require('../robot/robotControl'); // Import robotics control
+
 
 const app = express();
 const server = http.createServer(app);
@@ -10,6 +12,26 @@ const io = new Server(server);
 const openai = new OpenAIApi(new Configuration({
   apiKey: 'YOUR_OPENAI_API_KEY',
 }));
+
+//robot
+socket.on('message', async (message) => {
+    console.log('Received: ', message);
+  
+    // Process message with OpenAI GPT-3/4
+    const completion = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: `Respond in Tamil or English: ${message}`,
+      max_tokens: 100,
+    });
+  
+    const aiResponse = completion.data.choices[0].text.trim();
+  
+    // Control robot based on AI response
+    controlRobot(aiResponse);
+  
+    socket.emit('response', aiResponse);
+  });
+
 
 app.get('/', (req, res) => {
   res.send('Server is running');
