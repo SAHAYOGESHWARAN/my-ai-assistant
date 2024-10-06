@@ -62,3 +62,70 @@ io.on('connection', (socket) => {
 server.listen(5000, () => {
   console.log('Server is running on http://localhost:5000');
 });
+
+
+require('dotenv').config(); // Load environment variables from .env file
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const { openai } = require('./config/openaiConfig'); // Use the openai config file
+const { controlRobot } = require('./robotControl');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+app.use(express.json()); // To parse JSON bodies
+
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('message', async (message) => {
+    console.log('Received: ', message);
+
+    try {
+      const completion = await openai.createCompletion({
+        model: 'text-davinci-003',
+        prompt: `Respond in Tamil or English: ${message}`,
+        max_tokens: 100,
+      });
+
+      const aiResponse = completion.data.choices[0].text.trim();
+      controlRobot(aiResponse); // Example to send command to the robot
+      socket.emit('response', aiResponse);
+    } catch (error) {
+      console.error('Error with OpenAI API:', error);
+      socket.emit('response', 'Sorry, I encountered an issue.');
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+server.listen(5000, () => {
+  console.log('Server is running on http://localhost:5000');
+});
+
+socket.on('message', async (message) => {
+    try {
+      const completion = await openai.createCompletion({
+        model: 'text-davinci-003',
+        prompt: `Respond in Tamil or English: ${message}`,
+        max_tokens: 100,
+      });
+  
+      const aiResponse = completion.data.choices[0].text.trim();
+      controlRobot(aiResponse); // Example to send command to the robot
+      socket.emit('response', aiResponse);
+    } catch (error) {
+      console.error('Error with OpenAI API:', error);
+      socket.emit('response', 'Sorry, I encountered an issue.');
+    }
+  });
+  
